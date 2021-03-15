@@ -5,6 +5,8 @@ helpDoc = """
 Create thumbnail from a video (default 4x4).
 usage:
     python pvt.py [video path]
+example:
+    python pvt.py videos/**/*.{mp4,avi,mkv,flv}
 require:
     pip install opencv-python
     Support Python3
@@ -49,6 +51,10 @@ def process(video_path, shape=(4, 4), img_format=".jpg", skip_exist=True):
     output_path = os.path.splitext(video_path)[0] + img_format
     if os.path.isfile(output_path) and skip_exist:
         print(f"'{output_path}' exist, ignore")
+        return
+
+    if not os.path.isfile(video_path):
+        print(f"'{video_path}' is not a file, ignore")
         return
 
     print(f"Processing '{video_path}'")
