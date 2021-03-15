@@ -37,15 +37,21 @@ def video_to_frames(video_filename, num_of_frames):
         success, image = cap.read()
         for i in range(1, num_of_frames + 1):
             cap.set(cv2.CAP_PROP_POS_FRAMES, round(total_frames * i / num_of_frames))
-            success, image = cap.read()
+            success, image = cap.retrieve()
             if not success:
                 break
             frames.append(image)
     return frames
 
 
-def process(video_path, shape=(4, 4), img_format=".jpg"):
+def process(video_path, shape=(4, 4), img_format=".jpg", skip_exist=True):
     """Extract frames from the video and creates thumbnails for one of each"""
+    output_path = os.path.splitext(video_path)[0] + img_format
+    if os.path.isfile(output_path) and skip_exist:
+        print(f"'{output_path}' exist, ignore")
+        return
+
+    print(f"Processing '{video_path}'")
     # Extract frames from video
     frames = video_to_frames(video_path, shape[0] * shape[1])
     thumbnail_shape = [shape, frames[0].shape]
@@ -56,9 +62,11 @@ def process(video_path, shape=(4, 4), img_format=".jpg"):
     thumbnail = concat_vh(frames)
     thumbnail_size = (frames[0][0].shape[1], frames[0][0].shape[0])
     thumbnail = cv2.resize(thumbnail, thumbnail_size, interpolation=cv2.INTER_AREA)
-    cv2.imwrite(os.path.splitext(video_path)[0] + img_format, thumbnail)
+    cv2.imwrite(output_path, thumbnail)
 
 
 if __name__ == "__main__":
-    for v in sys.argv[1:]:
+    videos = sys.argv[1:]
+    print(f"Total: {len(videos)} videos")
+    for v in videos:
         process(v)
