@@ -4,9 +4,10 @@
 helpDoc = """
 Create thumbnail from a video (default 4x4).
 usage:
-    python pvt.py [video path]
+    python pvt.py -d '[video folder]' 2>/dev/null
+    details can be accessed by: python pvt.py -h
 example:
-    python pvt.py videos/**/*.{mp4,avi,mkv,flv}
+    python pvt.py -d 'videos/' 2>/dev/null
 require:
     pip install opencv-python
     Support Python3
@@ -22,6 +23,8 @@ import sys
 import cv2
 import time
 import numpy as np
+import argparse
+import glob
 
 
 def concat_vh(list_2d):
@@ -37,17 +40,21 @@ def video_to_frames(video_filename, num_of_frames):
     if cap.isOpened() and total_frames > 0:
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         success, image = cap.retrieve()
-        blank = np.zeros((image.shape[0], image.shape[1], image.shape[2]), dtype="uint8")
+        blank = np.zeros(
+            (image.shape[0], image.shape[1], image.shape[2]), dtype="uint8"
+        )
         for i in range(1, num_of_frames + 1):
             cap.set(cv2.CAP_PROP_POS_FRAMES, round(total_frames * i / num_of_frames))
             success, image = cap.retrieve()
             if not success:
-                break;
+                break
             frames.append(image)
     return frames
 
 
-def process(video_path, shape=(4, 4), img_format=".jpg", skip_exist=True, verbose_level=2):
+def process(
+    video_path, shape=(4, 4), img_format=".jpg", skip_exist=True, verbose_level=2
+):
     """Extract frames from the video and creates thumbnails for one of each"""
     output_path = os.path.splitext(video_path)[0] + img_format
     if os.path.isfile(output_path) and skip_exist:
@@ -80,8 +87,45 @@ def process(video_path, shape=(4, 4), img_format=".jpg", skip_exist=True, verbos
     cv2.imwrite(output_path, thumbnail)
 
 
-if __name__ == "__main__":
-    videos = sys.argv[1:]
-    print(f"Total: {len(videos)} videos")
+def get_parser():
+    parser = argparse.ArgumentParser(description="Create thumbnail from a video")
+    parser.add_argument("-s", "--shape", type=int, default=4)
+    parser.add_argument("-k", "--exist", action="store_false")
+    parser.add_argument("-v", "--verbose", type=int, default=2, choices=[0, 1, 2, 3])
+    parser.add_argument("-e", "--extension", type=str, default="mp4,avi,mkv,flv")
+    parser.add_argument("-i", "--input", type=str, default="")
+    parser.add_argument("-d", "--input_dir", type=str, default="")
+    return parser
+
+
+def main():
+    parser = get_parser()
+    args = parser.parse_args()
+    print("Setting:")
+    print(f"shape: {args.shape}x{args.shape}")
+    print(f"skip_exist: {args.exist}")
+    print(f"verbose: {args.verbose}")
+    videos = []
+    if args.input != "":
+        videos.append(args.input)
+    if args.input_dir != "":
+        for ext in args.extension.split(","):
+            videos.extend(
+                glob.glob(os.path.join(args.input_dir, "**/*." + ext), recursive=True)
+            )
+    if args.verbose >= 3:
+        print(f"videos: {videos}")
+    print(f"Total: {len(videos)} videos{' (nothing to do...)' if len(videos) == 0 else ''}")
+
+    
     for v in videos:
-        process(v)
+        process(
+            v,
+            shape=(args.shape, args.shape),
+            skip_exist=args.exist,
+            verbose_level=args.verbose,
+        )
+
+
+if __name__ == "__main__":
+    main()
