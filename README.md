@@ -43,14 +43,20 @@ Create thumbnail from a video
 optional arguments:
   -h, --help            show this help message and exit
   -s SHAPE, --shape SHAPE
-  -k, --exist
+                        use NxN grid (default: 4)
+  -k, --exist           skip exist (default: True)
   -v {0,1,2,3}, --verbose {0,1,2,3}
+                        verbose level (default: 2)
   -e EXTENSION, --extension EXTENSION
+                        extensions for video (default:
+                        mp4,avi,mkv,m4v,flv,wmv)
   -i INPUT, --input INPUT
+                        single input (default: )
   -d INPUT_DIR, --input_dir INPUT_DIR
+                        folder for processing recursively (default: )
 ```
 
-## Optional
+## Optional for NAS
 
 ```bash
 $ sudo mount -t drvfs '\\ben-nas\private' /mnt/share

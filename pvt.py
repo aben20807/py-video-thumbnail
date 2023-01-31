@@ -88,13 +88,35 @@ def process(
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description="Create thumbnail from a video")
-    parser.add_argument("-s", "--shape", type=int, default=4)
-    parser.add_argument("-k", "--exist", action="store_false")
-    parser.add_argument("-v", "--verbose", type=int, default=2, choices=[0, 1, 2, 3])
-    parser.add_argument("-e", "--extension", type=str, default="mp4,avi,mkv,flv")
-    parser.add_argument("-i", "--input", type=str, default="")
-    parser.add_argument("-d", "--input_dir", type=str, default="")
+    parser = argparse.ArgumentParser(
+        description="Create thumbnail from a video",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("-s", "--shape", type=int, default=4, help="use NxN grid")
+    parser.add_argument("-k", "--exist", action="store_false", help="skip exist")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        type=int,
+        default=2,
+        choices=[0, 1, 2, 3],
+        help="verbose level",
+    )
+    parser.add_argument(
+        "-e",
+        "--extension",
+        type=str,
+        default="mp4,avi,mkv,m4v,flv,wmv",
+        help="extensions for video",
+    )
+    parser.add_argument("-i", "--input", type=str, default="", help="single input")
+    parser.add_argument(
+        "-d",
+        "--input_dir",
+        type=str,
+        default="",
+        help="folder for processing recursively",
+    )
     return parser
 
 
@@ -115,9 +137,10 @@ def main():
             )
     if args.verbose >= 3:
         print(f"videos: {videos}")
-    print(f"Total: {len(videos)} videos{' (nothing to do...)' if len(videos) == 0 else ''}")
+    print(
+        f"Total: {len(videos)} videos{' (nothing to do...)' if len(videos) == 0 else ''}"
+    )
 
-    
     for v in videos:
         process(
             v,
