@@ -6,7 +6,7 @@ Create thumbnail from a video (default 4x4).
 ```bash
 $ virtualenv -p python3 venv
 $ source venv/bin/activate
-$ pip install opencv-python
+$ pip install opencv-python Pillow
 ```
 
 ## Usage
@@ -36,7 +36,7 @@ Author:
 GitHub:
     https://github.com/aben20807/py-video-thumbnail
 
-usage: pvt.py [-h] [-s SHAPE] [-k] [-v {0,1,2,3}] [-e EXTENSION] [-i INPUT] [-d INPUT_DIR]
+usage: pvt.py [-h] [-s SHAPE] [-k] [-v {0,1,2,3}] [-e EXTENSION] [--info] [--font FONT] [-i INPUT] [-d INPUT_DIR]
 
 Create thumbnail from a video
 
@@ -48,8 +48,9 @@ optional arguments:
   -v {0,1,2,3}, --verbose {0,1,2,3}
                         verbose level (default: 2)
   -e EXTENSION, --extension EXTENSION
-                        extensions for video (default:
-                        mp4,avi,mkv,m4v,flv,wmv)
+                        extensions for video (default: mp4,avi,mkv,m4v,flv,wmv)
+  --info                show the info in thumbnail (default: False)
+  --font FONT           the path of the custom font (default: )
   -i INPUT, --input INPUT
                         single input (default: )
   -d INPUT_DIR, --input_dir INPUT_DIR

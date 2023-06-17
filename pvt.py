@@ -19,12 +19,13 @@ GitHub:
 print(helpDoc)
 
 import os
-import sys
 import cv2
-import time
 import numpy as np
 import argparse
 import glob
+import datetime
+from PIL import ImageFont, ImageDraw, Image
+from textwrap import wrap
 
 
 def concat_vh(list_2d):
@@ -35,25 +36,44 @@ def video_to_frames(video_filename, num_of_frames):
     """Extract frames from video"""
     cap = cv2.VideoCapture(video_filename)
 
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) * 0.94)
+    frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    video_time = datetime.timedelta(seconds=round(frames / fps))
+
+    total_frames = int(frames * 0.94)
     frames = []
     if cap.isOpened() and total_frames > 0:
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         success, image = cap.retrieve()
-        blank = np.zeros(
-            (image.shape[0], image.shape[1], image.shape[2]), dtype="uint8"
-        )
         for i in range(1, num_of_frames + 1):
             cap.set(cv2.CAP_PROP_POS_FRAMES, round(total_frames * i / num_of_frames))
             success, image = cap.retrieve()
             if not success:
                 break
             frames.append(image)
-    return frames
+    return frames, video_time
+
+
+def get_wrapped_text(text: str, font: ImageFont.ImageFont, line_length: int):
+    # https://stackoverflow.com/a/67203353
+    lines = [""]
+    for chunk in wrap(text, width=5, drop_whitespace=False):
+        line = f"{lines[-1]}{chunk}"
+        if font.getlength(line) <= line_length:
+            lines[-1] = line
+        else:
+            lines.append(chunk)
+    return "\n".join(lines)
 
 
 def process(
-    video_path, shape=(4, 4), img_format=".jpg", skip_exist=True, verbose_level=2
+    video_path,
+    shape=(4, 4),
+    img_format=".jpg",
+    skip_exist=True,
+    verbose_level=2,
+    info=False,
+    font_path="",
 ):
     """Extract frames from the video and creates thumbnails for one of each"""
     output_path = os.path.splitext(video_path)[0] + img_format
@@ -70,7 +90,7 @@ def process(
     if verbose_level >= 2:
         print(f"Processing '{video_path}'")
     # Extract frames from video
-    frames = video_to_frames(video_path, shape[0] * shape[1])
+    frames, video_time = video_to_frames(video_path, shape[0] * shape[1])
     try:
         thumbnail_shape = [shape, frames[0].shape]
     except IndexError as e:
@@ -82,8 +102,36 @@ def process(
 
     # Generate and save combined thumbnail
     thumbnail = concat_vh(frames)
-    thumbnail_size = (frames[0][0].shape[1], frames[0][0].shape[0])
-    thumbnail = cv2.resize(thumbnail, thumbnail_size, interpolation=cv2.INTER_AREA)
+    w, h = frames[0][0].shape[1], frames[0][0].shape[0]
+    thumbnail = cv2.resize(thumbnail, (w, h), interpolation=cv2.INTER_AREA)
+
+    if info and font_path == "":
+        print("You should also set font for drawing info")
+    elif info:
+        # Add info to the top of thumbnail
+        font = ImageFont.truetype(font_path, w // 60)
+        info_x, info_y = w // 50, h // 50
+        filename = os.path.basename(video_path)
+        filename = get_wrapped_text(filename, font, w * 0.94)
+        info = f"{filename}\n{video_time}"
+        text_height = (info.count("\n") + 1) * font.getbbox(info)[3]
+
+        # Add white padding on the top of image
+        thumbnail = cv2.copyMakeBorder(
+            thumbnail,
+            text_height + info_y * 2,
+            0,
+            0,
+            0,
+            cv2.BORDER_CONSTANT,
+            value=(255, 255, 255),
+        )
+        img_pil = Image.fromarray(thumbnail)
+        draw = ImageDraw.Draw(img_pil)
+        draw.text((info_x, info_y), info, font=font, fill=(0, 0, 0))
+
+        # convert back for cv2
+        thumbnail = np.array(img_pil)
     cv2.imwrite(output_path, thumbnail)
 
 
@@ -108,6 +156,15 @@ def get_parser():
         type=str,
         default="mp4,avi,mkv,m4v,flv,wmv",
         help="extensions for video",
+    )
+    parser.add_argument(
+        "--info", action="store_true", help="show the info in thumbnail"
+    )
+    parser.add_argument(
+        "--font",
+        type=str,
+        default="",
+        help="the path of the custom font",
     )
     parser.add_argument("-i", "--input", type=str, default="", help="single input")
     parser.add_argument(
@@ -147,6 +204,8 @@ def main():
             shape=(args.shape, args.shape),
             skip_exist=args.exist,
             verbose_level=args.verbose,
+            info=args.info,
+            font_path=args.font,
         )
 
 
