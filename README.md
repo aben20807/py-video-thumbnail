@@ -66,4 +66,6 @@ $ sudo umount /mnt/share
 
 ## Result
 
-![](img/BigBuckBunny.jpg)
+![BigBuckBunny](https://github.com/aben20807/py-video-thumbnail/assets/14831545/18d35dcd-4022-4bba-9b98-b23ce4906801)
+
+![BigBuckBunny](https://github.com/aben20807/py-video-thumbnail/assets/14831545/5b8cbe55-7cbe-47c1-bfe8-0dea243640ad)
