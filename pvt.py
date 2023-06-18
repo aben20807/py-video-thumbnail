@@ -19,6 +19,8 @@ GitHub:
 print(helpDoc)
 
 import os
+import io
+import requests
 import cv2
 import numpy as np
 import argparse
@@ -26,7 +28,6 @@ import glob
 import datetime
 from PIL import ImageFont, ImageDraw, Image
 from textwrap import wrap
-from urllib.request import urlopen
 from urllib.error import URLError
 
 
@@ -107,8 +108,11 @@ def process(
     w, h = frames[0][0].shape[1], frames[0][0].shape[0]
     thumbnail = cv2.resize(thumbnail, (w, h), interpolation=cv2.INTER_AREA)
 
-    if info and font_path != "":
+    if info and font_path is not None:
         # Add info to the top of thumbnail
+        if isinstance(font_path, (bytes, bytearray)):
+            # if the font_path is byte-like, it means the font is from online
+            font_path = io.BytesIO(font_path)
         font = ImageFont.truetype(font_path, w // 60)
         info_x, info_y = w // 50, h // 50
         filename = os.path.basename(video_path)
@@ -163,7 +167,7 @@ def get_parser():
     parser.add_argument(
         "--font",
         type=str,
-        default="",
+        default=None,
         help="the path of the custom font",
     )
     parser.add_argument("-i", "--input", type=str, default="", help="single input")
@@ -199,10 +203,12 @@ def main():
     )
 
     font_path = args.font
-    if args.info and font_path == "":
+    if args.info and font_path is None:
         try:
+            # get the online font if the font_path is not set
             default_font_url = "https://github.com/notofonts/noto-cjk/blob/main/Sans/OTF/TraditionalChinese/NotoSansCJKtc-Regular.otf?raw=true"
-            font_path = urlopen(default_font_url)
+            online_font = requests.get(default_font_url).content
+            font_path = online_font
         except URLError:
             print(
                 f"You should set font by `--font FONT` for drawing info because accessing url `{default_font_url}` is failed"

@@ -6,7 +6,7 @@ Create thumbnail from a video (default 4x4).
 ```bash
 $ virtualenv -p python3 venv
 $ source venv/bin/activate
-$ pip install opencv-python Pillow
+$ pip install opencv-python Pillow requests
 ```
 
 ## Usage
@@ -50,7 +50,7 @@ optional arguments:
   -e EXTENSION, --extension EXTENSION
                         extensions for video (default: mp4,avi,mkv,m4v,flv,wmv)
   --info                show the info in thumbnail (default: False)
-  --font FONT           the path of the custom font (default: )
+  --font FONT           the path of the custom font (default: None)
   -i INPUT, --input INPUT
                         single input (default: )
   -d INPUT_DIR, --input_dir INPUT_DIR
