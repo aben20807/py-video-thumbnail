@@ -9,7 +9,7 @@ usage:
 example:
     python pvt.py -d 'videos/' 2>/dev/null
 require:
-    pip install opencv-python
+    pip install opencv-python Pillow requests
     Support Python3
 Author:
     Huang Po-Hsuan (aben20807@gmail.com)
