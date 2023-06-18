@@ -1,12 +1,35 @@
 # py-video-thumbnail
 
-Create thumbnail from a video (default 4x4).
+Create thumbnails (default 4x4) from given videos.
 
 ## Environment
+
 ```bash
-$ virtualenv -p python3 venv
-$ source venv/bin/activate
+$ virtualenv -p python3 .venv
+$ source .venv/bin/activate
 $ pip install opencv-python Pillow requests
+```
+
++ Tested environment
+
+```bash
+$ python --version
+Python 3.8.10
+$ pip list
+Package            Version 
+------------------ --------
+certifi            2023.5.7
+charset-normalizer 3.1.0   
+idna               3.4     
+numpy              1.22.4  
+opencv-python      4.5.5.64
+Pillow             9.5.0   
+pip                20.0.2  
+pkg-resources      0.0.0   
+requests           2.31.0  
+setuptools         44.0.0  
+urllib3            2.0.3   
+wheel              0.34.2
 ```
 
 ## Usage
