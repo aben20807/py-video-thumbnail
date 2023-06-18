@@ -66,6 +66,14 @@ $ sudo umount /mnt/share
 
 ## Result
 
+```bash
+$ python pvt.py -i 'BigBuckBunny.mp4'
+```
+
 ![BigBuckBunny](https://github.com/aben20807/py-video-thumbnail/assets/14831545/18d35dcd-4022-4bba-9b98-b23ce4906801)
+
+```bash
+$ python pvt.py -i 'BigBuckBunny.mp4' --info
+```
 
 ![BigBuckBunny](https://github.com/aben20807/py-video-thumbnail/assets/14831545/5b8cbe55-7cbe-47c1-bfe8-0dea243640ad)

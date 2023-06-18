@@ -26,6 +26,8 @@ import glob
 import datetime
 from PIL import ImageFont, ImageDraw, Image
 from textwrap import wrap
+from urllib.request import urlopen
+from urllib.error import URLError
 
 
 def concat_vh(list_2d):
@@ -105,9 +107,7 @@ def process(
     w, h = frames[0][0].shape[1], frames[0][0].shape[0]
     thumbnail = cv2.resize(thumbnail, (w, h), interpolation=cv2.INTER_AREA)
 
-    if info and font_path == "":
-        print("You should also set font for drawing info")
-    elif info:
+    if info and font_path != "":
         # Add info to the top of thumbnail
         font = ImageFont.truetype(font_path, w // 60)
         info_x, info_y = w // 50, h // 50
@@ -198,6 +198,18 @@ def main():
         f"Total: {len(videos)} videos{' (nothing to do...)' if len(videos) == 0 else ''}"
     )
 
+    font_path = args.font
+    if args.info and font_path == "":
+        try:
+            default_font_url = "https://github.com/notofonts/noto-cjk/blob/main/Sans/OTF/TraditionalChinese/NotoSansCJKtc-Regular.otf?raw=true"
+            font_path = urlopen(default_font_url)
+        except URLError:
+            print(
+                f"You should set font by `--font FONT` for drawing info because accessing url `{default_font_url}` is failed"
+            )
+        else:
+            print("Use default font (NotoSansCJKtc-Regular) to draw info text")
+
     for v in videos:
         process(
             v,
@@ -205,7 +217,7 @@ def main():
             skip_exist=args.exist,
             verbose_level=args.verbose,
             info=args.info,
-            font_path=args.font,
+            font_path=font_path,
         )
 
 
